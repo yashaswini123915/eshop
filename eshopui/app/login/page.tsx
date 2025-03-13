@@ -1,24 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { getUser } from "@/utils/storage";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const storedUser = getUser();
-    if (storedUser && storedUser.email === email && storedUser.password === password) {
-      alert("Login successful!");
-      router.push("/");
-    } else {
-      alert("User not registered or incorrect credentials!");
-    }
+    login(email, password);
   };
 
   return (
