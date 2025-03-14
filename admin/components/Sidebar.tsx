@@ -7,11 +7,12 @@ import { LayoutDashboard, Package, List, Users, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const sidebarLinks = [
-  { href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { href: "/admin/products", label: "Products", icon: <Package className="w-5 h-5" /> },
-  { href: "/admin/categories", label: "Categories", icon: <List className="w-5 h-5" /> },
-  { href: "/admin/vendors", label: "Vendors", icon: <Users className="w-5 h-5" /> },
-  { href: "/admin/switch", label: "Switch Account", icon: <RefreshCw className="w-5 h-5" /> },
+  { href: "/", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { href: "./DashboardStats", label: "DashboardStats", icon: <Package className="w-5 h-5" /> },
+  { href: "./products", label: "Products", icon: <Package className="w-5 h-5" /> },
+  { href: "./categories", label: "Categories", icon: <List className="w-5 h-5" /> },
+  { href: "./vendors", label: "Vendors", icon: <Users className="w-5 h-5" /> },
+  { href: "./swtich", label: "Swtich Account", icon: <RefreshCw className="w-5 h-5" /> },
 ];
 
 export default function Sidebar() {

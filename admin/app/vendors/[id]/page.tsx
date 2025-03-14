@@ -13,12 +13,20 @@ interface Vendor {
 }
 
 export default function VendorDashboard() {
-  const { id } = useParams();
+  const params = useParams();
   const router = useRouter();
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const id = params?.id ? parseInt(params.id as string, 10) : null;
+
   useEffect(() => {
+    if (!id) {
+      console.error("Vendor ID is missing");
+      router.push("/switch"); // Redirect if ID is missing
+      return;
+    }
+
     const fetchVendor = async () => {
       try {
         const response = await fetch(`/api/vendors?id=${id}`);
@@ -28,13 +36,13 @@ export default function VendorDashboard() {
         setVendor(data);
       } catch (error) {
         console.error(error);
-        router.push("/switch"); // Redirect if vendor is not found
+        router.push("/switch");
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchVendor();
+    fetchVendor();
   }, [id, router]);
 
   if (loading) return <p className="text-center mt-10">Loading vendor data...</p>;

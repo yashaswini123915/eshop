@@ -18,48 +18,65 @@ export default function CategoryTable() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [open, setOpen] = useState(false);
 
-  // Fetch categories from local storage
+  // Fetch categories from API
   useEffect(() => {
-    const storedCategories = JSON.parse(localStorage.getItem("categories") || "[]");
-    setCategories(storedCategories);
+    fetchCategories();
   }, []);
 
-  // Save to local storage
-  const updateLocalStorage = (updatedCategories: Category[]) => {
-    localStorage.setItem("categories", JSON.stringify(updatedCategories));
+  const fetchCategories = async () => {
+    const res = await fetch("/api/categories");
+    const data = await res.json();
+    setCategories(data);
   };
 
-  // Add a new category
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
     if (!newCategory.trim()) return;
 
-    const updatedCategories = [...categories, { id: Date.now(), name: newCategory }];
-    setCategories(updatedCategories);
-    updateLocalStorage(updatedCategories);
-    setNewCategory("");
-    setOpen(false);
+    const res = await fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newCategory }),
+    });
+
+    if (res.ok) {
+      fetchCategories();
+      handleCloseDialog();
+    } else {
+      alert("Error: Category already exists!");
+    }
   };
 
-  // Update an existing category
-  const handleUpdateCategory = () => {
+  const handleUpdateCategory = async () => {
     if (!editingCategory) return;
 
-    const updatedCategories = categories.map((cat) =>
-      cat.id === editingCategory.id ? { ...cat, name: newCategory } : cat
-    );
+    const res = await fetch("/api/categories", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editingCategory.id, name: newCategory }),
+    });
 
-    setCategories(updatedCategories);
-    updateLocalStorage(updatedCategories);
-    setEditingCategory(null);
-    setNewCategory("");
-    setOpen(false);
+    if (res.ok) {
+      fetchCategories();
+      handleCloseDialog();
+    } else {
+      alert("Error updating category");
+    }
   };
 
-  // Delete a category
-  const handleDeleteCategory = (id: number) => {
-    const updatedCategories = categories.filter((cat) => cat.id !== id);
-    setCategories(updatedCategories);
-    updateLocalStorage(updatedCategories);
+  const handleDeleteCategory = async (id: number) => {
+    const res = await fetch("/api/categories", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+
+    if (res.ok) fetchCategories();
+  };
+
+  const handleCloseDialog = () => {
+    setNewCategory("");
+    setEditingCategory(null);
+    setOpen(false);
   };
 
   return (
@@ -117,20 +134,19 @@ export default function CategoryTable() {
       </Table>
 
       {/* Dialog for adding/editing category */}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleCloseDialog()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingCategory ? "Edit Category" : "Add Category"}</DialogTitle>
           </DialogHeader>
+          <label className="block text-sm font-medium mb-2">Category Name:</label>
           <Input
-            placeholder="Category Name"
+            placeholder="Enter category name"
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
           />
           <DialogFooter>
-            <Button
-              onClick={editingCategory ? handleUpdateCategory : handleAddCategory}
-            >
+            <Button onClick={editingCategory ? handleUpdateCategory : handleAddCategory}>
               {editingCategory ? "Update" : "Add"}
             </Button>
           </DialogFooter>

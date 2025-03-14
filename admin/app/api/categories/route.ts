@@ -1,50 +1,97 @@
 import { NextResponse } from "next/server";
+import fs from 'fs';
+import path from 'path';
 
-let categories = [
-  { id: 1, name: "Electronics" },
-  { id: 2, name: "Clothing" },
-  { id: 3, name: "Home & Kitchen" },
-];
+const categoriesFilePath = path.resolve(process.cwd(), 'categories.json');
 
-//  GET - Fetch all categories
+// Helper function to get categories from file
+const getCategories = () => {
+  if (!fs.existsSync(categoriesFilePath)) {
+    return [];
+  }
+  const categories = JSON.parse(fs.readFileSync(categoriesFilePath, 'utf-8'));
+  return categories;
+};
+
+// Helper function to save categories to file
+interface Category {
+  id: number;
+  name: string;
+}
+
+const saveCategories = (categories: Category[]) => {
+  fs.writeFileSync(categoriesFilePath, JSON.stringify(categories, null, 2));
+};
+
+// **GET - Fetch all categories**
 export async function GET() {
-  return NextResponse.json(categories);
+  try {
+    const categories = getCategories();
+    return NextResponse.json(categories);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
+  }
 }
 
-//  POST - Add a new category
+// **POST - Add a new category**
 export async function POST(req: Request) {
-  const newCategory = await req.json();
-  const category = { id: categories.length + 1, ...newCategory };
-  categories.push(category);
+  try {
+    const { name } = await req.json();
+    if (!name) {
+      return NextResponse.json({ error: "Category name is required" }, { status: 400 });
+    }
 
-  return NextResponse.json({ message: "Category added", category });
+    const categories = getCategories();
+
+    // Prevent duplicate category names
+    if (categories.some((cat: Category) => cat.name.toLowerCase() === name.toLowerCase())) {
+      return NextResponse.json({ error: "Category already exists" }, { status: 409 });
+    }
+
+    const newCategory = { id: Date.now(), name };
+    categories.push(newCategory);
+    saveCategories(categories);
+
+    return NextResponse.json({ message: "Category added", category: newCategory });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to add category" }, { status: 500 });
+  }
 }
 
-//  PUT - Update a category (Use Query Params: ?id=1)
+// **PUT - Update a category**
 export async function PUT(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const id = parseInt(searchParams.get("id") || "0");
-  const updatedData = await req.json();
+  try {
+    const { id, name } = await req.json();
+    const categories = getCategories();
+    const index = categories.findIndex((cat: { id: number; name: string }) => cat.id === id);
 
-  const categoryIndex = categories.findIndex((c) => c.id === id);
-  if (categoryIndex === -1) {
-    return NextResponse.json({ error: "Category not found" }, { status: 404 });
+    if (index === -1) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+    }
+
+    categories[index].name = name;
+    saveCategories(categories);
+
+    return NextResponse.json({ message: "Category updated", categories });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to update category" }, { status: 500 });
   }
-
-  categories[categoryIndex] = { ...categories[categoryIndex], ...updatedData };
-  return NextResponse.json({ message: "Category updated", categories });
 }
 
-// DELETE - Remove a category (Use Query Param: ?id=1)
+// **DELETE - Remove a category**
 export async function DELETE(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const id = parseInt(searchParams.get("id") || "0");
+  try {
+    const { id } = await req.json();
+    let categories = getCategories();
+    categories = categories.filter((cat: Category) => cat.id !== id);
+    saveCategories(categories);
 
-  const categoryIndex = categories.findIndex((c) => c.id === id);
-  if (categoryIndex === -1) {
-    return NextResponse.json({ error: "Category not found" }, { status: 404 });
+    return NextResponse.json({ message: "Category deleted", categories });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to delete category" }, { status: 500 });
   }
-
-  categories = categories.filter((c) => c.id !== id);
-  return NextResponse.json({ message: "Category deleted", categories });
 }
