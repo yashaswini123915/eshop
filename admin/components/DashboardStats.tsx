@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+//mport AdminLayout from "./AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   BarChart,
@@ -80,6 +81,7 @@ const DashboardStats = () => {
   ];
 
   return (
+    
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
       {error && <p className="text-red-500">{error}</p>}
 
@@ -134,6 +136,7 @@ const DashboardStats = () => {
         </CardContent>
       </Card>
     </div>
+    
   );
 };
 

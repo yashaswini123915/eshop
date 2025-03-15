@@ -1,54 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
+// Mock database (Replace this with actual database logic)
 let vendors = [
-  { id: 1, name: "Vendor One", email: "vendor1@example.com", status: "pending" },
-  { id: 2, name: "Vendor Two", email: "vendor2@example.com", status: "approved" },
+  { id: 1, username: "Vendor1", email: "vendor1@example.com", status: "pending" },
+  { id: 2, username: "Vendor2", email: "vendor2@example.com", status: "approved" },
 ];
 
-// GET: Fetch all vendors or a single vendor
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-
-  if (id) {
-    const vendor = vendors.find((v) => v.id === parseInt(id, 10));
-    return vendor
-      ? NextResponse.json(vendor)
-      : NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+// GET: Fetch all vendors
+export async function GET() {
+  try {
+    return NextResponse.json({ success: true, vendors, total: vendors.length });
+  } catch (error) {
+    console.error("Error fetching vendors:", error);
+    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
-
-  return NextResponse.json(vendors);
 }
 
-// POST: Add a new vendor
-export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const newVendor = { id: vendors.length + 1, ...body, status: "pending" };
-  vendors.push(newVendor);
-  return NextResponse.json({ message: "Vendor added", vendor: newVendor });
-}
+// POST: Approve a vendor
+export async function POST(req: Request) {
+  try {
+    const { id, action } = await req.json();
 
-// PUT: Update vendor status
-export async function PUT(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-  const status = searchParams.get("status");
+    if (!id || !["approve", "delete"].includes(action)) {
+      return NextResponse.json({ success: false, error: "Invalid request" }, { status: 400 });
+    }
 
-  if (!id || !status) {
-    return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+    if (action === "approve") {
+      vendors = vendors.map((vendor) =>
+        vendor.id === id ? { ...vendor, status: "approved" } : vendor
+      );
+      return NextResponse.json({ success: true, message: "Vendor approved" });
+    }
+
+    if (action === "delete") {
+      vendors = vendors.filter((vendor) => vendor.id !== id);
+      return NextResponse.json({ success: true, message: "Vendor deleted" });
+    }
+  } catch (error) {
+    console.error("Error processing request:", error);
+    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
-
-  vendors = vendors.map((v) => (v.id === parseInt(id, 10) ? { ...v, status } : v));
-  return NextResponse.json({ message: "Vendor updated", vendors });
-}
-
-// DELETE: Remove a vendor
-export async function DELETE(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-
-  if (!id) return NextResponse.json({ error: "Missing vendor ID" }, { status: 400 });
-
-  vendors = vendors.filter((v) => v.id !== parseInt(id, 10));
-  return NextResponse.json({ message: "Vendor deleted", vendors });
 }

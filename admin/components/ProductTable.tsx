@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Trash, Edit } from "lucide-react";
+//import AdminLayout from "./AdminLayout";
 
 interface Product {
   id: number;
@@ -54,6 +55,7 @@ export default function ProductTable() {
   };
 
   return (
+   
     <div>
       <div className="flex items-center gap-2 mb-4">
         <Input
@@ -135,5 +137,6 @@ export default function ProductTable() {
         </TableBody>
       </Table>
     </div>
+   
   );
 }

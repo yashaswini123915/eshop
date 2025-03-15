@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 interface Vendor {
   id: number;
-  name: string;
+  username: string;
   email: string;
   status: string;
 }
@@ -17,38 +17,49 @@ interface Vendor {
 export default function VendorTable() {
   const router = useRouter();
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<number | null>(null); // Track button loading state
 
+  // Fetch vendors from the API
   const fetchVendors = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch("/api/vendors");
+
+      if (!response.ok) throw new Error("Failed to fetch vendors");
+
       const data = await response.json();
-      setVendors(data);
-    } catch {
-      toast.error("Failed to load vendors");
+      setVendors(Array.isArray(data.vendors) ? data.vendors : []);
+    } catch (error) {
+      console.error("Error fetching vendors:", error);
+      setError("Failed to load vendors");
     } finally {
       setLoading(false);
     }
   };
 
-  const approveVendor = async (id: number) => {
+  // Handle vendor actions (approve/delete)
+  const handleVendorAction = async (id: number, action: "approve" | "delete") => {
+    setActionLoading(id);
     try {
-      await fetch(`/api/vendors?id=${id}&status=approved`, { method: "PUT" });
-      toast.success("Vendor approved!");
-      fetchVendors();
-    } catch {
-      toast.error("Failed to approve vendor");
-    }
-  };
+      const response = await fetch("/api/vendors", {
+        method: "POST",
+        body: JSON.stringify({ id, action }),
+        headers: { "Content-Type": "application/json" },
+      });
 
-  const deleteVendor = async (id: number) => {
-    try {
-      await fetch(`/api/vendors?id=${id}`, { method: "DELETE" });
-      toast.success("Vendor deleted!");
-      fetchVendors();
-    } catch {
-      toast.error("Failed to delete vendor");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Action failed");
+
+      toast.success(data.message);
+      fetchVendors(); // Refresh vendor list
+    } catch (error) {
+      console.error(`Error ${action} vendor:`, error);
+      toast.error(`Failed to ${action} vendor`);
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -63,13 +74,17 @@ export default function VendorTable() {
       </CardHeader>
       <CardContent>
         {loading ? (
-          <p>Loading vendors...</p>
+          <p className="text-center">Loading vendors...</p>
+        ) : error ? (
+          <p className="text-red-500 text-center">{error}</p>
+        ) : vendors.length === 0 ? (
+          <p className="text-center text-gray-500">No vendors available</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead>Username</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
@@ -79,13 +94,28 @@ export default function VendorTable() {
               {vendors.map((vendor) => (
                 <TableRow key={vendor.id}>
                   <TableCell>{vendor.id}</TableCell>
-                  <TableCell>{vendor.name}</TableCell>
+                  <TableCell>{vendor.username}</TableCell>
                   <TableCell>{vendor.email}</TableCell>
                   <TableCell>{vendor.status}</TableCell>
-                  <TableCell>
-                    <Button onClick={() => router.push(`/vendors/${vendor.id}`)}>View</Button>
-                    <Button onClick={() => approveVendor(vendor.id)}>Approve</Button>
-                    <Button variant="destructive" onClick={() => deleteVendor(vendor.id)}>Delete</Button>
+                  <TableCell className="space-x-2">
+                    <Button size="sm" onClick={() => router.push(`/vendors/${vendor.id}`)}>View</Button>
+                    {vendor.status !== "approved" && (
+                      <Button
+                        size="sm"
+                        disabled={actionLoading === vendor.id}
+                        onClick={() => handleVendorAction(vendor.id, "approve")}
+                      >
+                        {actionLoading === vendor.id ? "Approving..." : "Approve"}
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={actionLoading === vendor.id}
+                      onClick={() => handleVendorAction(vendor.id, "delete")}
+                    >
+                      {actionLoading === vendor.id ? "Deleting..." : "Delete"}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Trash, Edit } from "lucide-react";
-
+//mport AdminLayout from "./AdminLayout";
 type Category = {
   id: number;
   name: string;
@@ -80,6 +80,7 @@ export default function CategoryTable() {
   };
 
   return (
+   
     <div className="border rounded-lg shadow-md p-4 bg-white">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Manage Categories</h2>
@@ -153,5 +154,6 @@ export default function CategoryTable() {
         </DialogContent>
       </Dialog>
     </div>
+  
   );
 }

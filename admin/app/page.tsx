@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-// import Sidebar from "@/components/Sidebar"; // Uncomment when Sidebar is available
+import AdminLayout from "@/components/AdminLayout";
 
 type Vendor = {
   id: number;
@@ -13,53 +13,75 @@ type Vendor = {
 
 const Dashboard = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [totalVendors, setTotalVendors] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Load vendors from localStorage on mount
+  // Fetch vendors from API
   useEffect(() => {
-    const storedVendors = JSON.parse(localStorage.getItem("vendors") || "[]") as Vendor[];
-    setVendors(storedVendors);
+    const fetchVendors = async () => {
+      try {
+        const res = await fetch("/api/vendors");
+        if (!res.ok) throw new Error("Failed to fetch vendors");
+        
+        const data = await res.json();
+        setVendors(data.vendors);
+        setTotalVendors(data.total);
+      } catch (error) {
+        console.error("Error fetching vendors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVendors();
   }, []);
 
-  // Allow/Disallow Vendor
   const handleAllow = (id: number) => {
-    const updatedVendors = vendors.map((vendor) =>
-      vendor.id === id ? { ...vendor, allowed: !vendor.allowed } : vendor
+    setVendors((prevVendors) =>
+      prevVendors.map((vendor) =>
+        vendor.id === id ? { ...vendor, allowed: !vendor.allowed } : vendor
+      )
     );
-    setVendors(updatedVendors);
-    localStorage.setItem("vendors", JSON.stringify(updatedVendors));
   };
 
-  // Delete Vendor
   const handleDelete = (id: number) => {
-    const updatedVendors = vendors.filter((vendor) => vendor.id !== id);
-    setVendors(updatedVendors);
-    localStorage.setItem("vendors", JSON.stringify(updatedVendors));
+    setVendors((prevVendors) => prevVendors.filter((vendor) => vendor.id !== id));
+    setTotalVendors((prev) => prev - 1); // Update total count on delete
   };
 
   return (
+    <AdminLayout>
     <div className="flex min-h-screen bg-gray-100">
-      {/* <Sidebar /> Uncomment when Sidebar is ready */}
       <main className="p-6 w-full max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-        <Card className="shadow-lg">
+        <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+
+        <Card className="shadow-lg mb-4">
           <CardContent className="p-4">
-            <h2 className="text-lg font-semibold mb-3">Vendors</h2>
-            {vendors.length === 0 ? (
+            <h2 className="text-lg font-semibold">Total Vendors: {loading ? "Loading..." : totalVendors}</h2>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardContent className="p-5">
+            <h2 className="text-lg font-semibold mb-4">Vendors</h2>
+            {loading ? (
+              <p>Loading vendors...</p>
+            ) : vendors.length === 0 ? (
               <p className="text-gray-500">No vendors available.</p>
             ) : (
               vendors.map((vendor) => (
-                <div key={vendor.id} className="flex justify-between items-center py-2 border-b">
-                  <span className="text-lg">{vendor.name}</span>
+                <div key={vendor.id} className="flex justify-between items-center py-3 border-b last:border-none">
+                  <span className="text-lg font-medium">{vendor.name}</span>
                   <div>
                     <Button
                       variant={vendor.allowed ? "destructive" : "default"}
                       onClick={() => handleAllow(vendor.id)}
+                      className="mr-2"
                     >
                       {vendor.allowed ? "Disallow" : "Allow"}
                     </Button>
                     <Button
                       variant="destructive"
-                      className="ml-2"
                       onClick={() => handleDelete(vendor.id)}
                     >
                       Delete
@@ -72,6 +94,7 @@ const Dashboard = () => {
         </Card>
       </main>
     </div>
+    </AdminLayout>
   );
 };
 

@@ -1,80 +1,59 @@
 "use client";
 
+import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import VendorLayout from "@/components/VendorLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+//import { Button } from "@/components/ui/button";
+import LogoutButton from "@/components/LogoutButton";
 
 interface Vendor {
   id: number;
-  name: string;
+  username: string;
   email: string;
   status: string;
 }
 
 export default function VendorDashboard() {
-  const params = useParams();
   const router = useRouter();
+  const { id } = useParams<{ id: string }>(); // Extract vendor ID
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const id = params?.id ? parseInt(params.id as string, 10) : null;
-
   useEffect(() => {
-    if (!id) {
-      console.error("Vendor ID is missing");
-      router.push("/switch"); // Redirect if ID is missing
-      return;
+    const vendors: Vendor[] = JSON.parse(localStorage.getItem("vendors") || "[]");
+    const foundVendor = vendors.find((v) => v.id === Number(id));
+
+    if (!foundVendor) {
+      router.push("/vendors/login"); // Redirect if vendor not found
+    } else if (foundVendor.status !== "approved") {
+      alert("Your account is pending admin approval.");
+      router.push("/vendors/login"); // Redirect if vendor is not approved
+    } else {
+      setVendor(foundVendor);
     }
-
-    const fetchVendor = async () => {
-      try {
-        const response = await fetch(`/api/vendors?id=${id}`);
-        if (!response.ok) throw new Error("Vendor not found");
-
-        const data = await response.json();
-        setVendor(data);
-      } catch (error) {
-        console.error(error);
-        router.push("/switch");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchVendor();
+    setLoading(false);
   }, [id, router]);
 
-  if (loading) return <p className="text-center mt-10">Loading vendor data...</p>;
+  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (!vendor) return null;
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Vendor Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {vendor ? (
-            <div className="space-y-4">
-              <p className="text-lg font-semibold">{vendor.name}</p>
-              <p className="text-sm text-gray-500">{vendor.email}</p>
-              <p className="text-sm">
-                Status:{" "}
-                <span
-                  className={`px-2 py-1 rounded ${
-                    vendor.status === "approved" ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"
-                  }`}
-                >
-                  {vendor.status}
-                </span>
-              </p>
-              <Button onClick={() => router.push("/switch")}>Switch Back to Admin</Button>
+    <VendorLayout username={vendor.username} onSignOut={() => router.push("/vendors/login")}>
+      <div className="flex flex-col items-center justify-center p-6">
+        <Card className="w-full max-w-lg">
+          <CardHeader>
+            <CardTitle className="text-center">Vendor Dashboard</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <h2 className="text-xl font-semibold">Welcome, {vendor.username}!</h2>
+            <p className="text-gray-600">Manage your shop and products here.</p>
+            <div className="mt-4">
+              <LogoutButton />
             </div>
-          ) : (
-            <p className="text-red-500">Vendor not found.</p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </VendorLayout>
   );
 }

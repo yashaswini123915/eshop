@@ -1,0 +1,5 @@
+[
+    { "id": 1, "username": "vendor1", "email": "vendor1@example.com", "status": "pending" },
+    { "id": 2, "username": "vendor2", "email": "vendor2@example.com", "status": "approved" }
+  ]
+  
