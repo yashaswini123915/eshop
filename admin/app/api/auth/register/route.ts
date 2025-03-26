@@ -5,7 +5,13 @@ let vendors: { username: string; email: string; password: string; status: string
 
 export async function POST(req: Request) {
   try {
-    const { username, email, password, confirmPassword } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (error) {
+      return NextResponse.json({ message: "Invalid JSON" }, { status: 400 });
+    }
+    const { username, email, password, confirmPassword } = requestBody;
 
     if (!username || !email || !password || !confirmPassword) {
       return NextResponse.json({ message: "All fields are required" }, { status: 400 });
