@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import VendorLayout from "@/components/VendorLayout";
 
 interface Order {
   id: number;
@@ -33,6 +34,7 @@ export default function VendorOrders() {
   };
 
   return (
+    <VendorLayout username={`Vendor ${id}`} onSignOut={() => router.push("/vendors/login")}>
     <div className="p-6">
       <Card className="w-full max-w-3xl mx-auto">
         <CardHeader>
@@ -67,5 +69,6 @@ export default function VendorOrders() {
         </CardContent>
       </Card>
     </div>
+    </VendorLayout>
   );
 }

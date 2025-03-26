@@ -1,83 +1,79 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import VendorLayout from "@/components/VendorLayout";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
-export default function VendorRegisterPage() {
+interface Vendor {
+  id: number;
+  username: string;
+  email: string;
+  status: string;
+}
+
+export default function VendorRegistration() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
+  const handleRegister = () => {
+    if (!username || !email) {
+      toast.error("Please fill all fields");
       return;
     }
 
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+    // Get existing vendors from local storage
+    const existingVendors: Vendor[] = JSON.parse(localStorage.getItem("vendors") || "[]");
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message);
-        setLoading(false);
-        return;
-      }
-
-      alert(data.message); // "Registration successful! Await admin approval."
-      router.push("/vendors/login");
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+    // Check if email already exists
+    const isEmailTaken = existingVendors.some((vendor) => vendor.email === email);
+    if (isEmailTaken) {
+      toast.error("This email is already registered.");
+      return;
     }
+
+    // Create a new vendor
+    const newVendor: Vendor = {
+      id: Date.now(),
+      username,
+      email,
+      status: "pending", // New vendors start as "pending"
+    };
+
+    // Update local storage
+    const updatedVendors = [...existingVendors, newVendor];
+    localStorage.setItem("vendors", JSON.stringify(updatedVendors));
+
+    toast.success("Registration successful! Waiting for approval.");
+
+    // Redirect to vendor dashboard or login page
+    router.push("/vendors");
   };
 
   return (
-    <VendorLayout username={formData.username} onSignOut={() => router.push("/vendors/login")}>
-    <div className="flex justify-center items-center h-screen">
-      <Card className="w-96">
-        <CardHeader>
-          <CardTitle>Vendor Registration</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input name="username" placeholder="Username" value={formData.username} onChange={handleChange} required />
-            <Input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-            <Input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
-            <Input type="password" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} required />
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Registering..." : "Register"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-    </VendorLayout>
+    <Card className="p-4 max-w-md mx-auto mt-10">
+      <CardHeader>
+        <CardTitle>Vendor Registration</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Input
+          placeholder="Enter username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <Input
+          placeholder="Enter email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Button className="w-full" onClick={handleRegister}>
+          Register
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

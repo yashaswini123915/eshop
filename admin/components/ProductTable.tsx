@@ -1,142 +1,82 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash, Edit } from "lucide-react";
-//import AdminLayout from "./AdminLayout";
+import { Badge } from "@/components/ui/badge";
 
 interface Product {
   id: number;
+  vendorId: number;
   name: string;
   price: number;
-  category: string;
+  image: string;
+  description: string;
+  status: "pending" | "approved" | "rejected";
 }
 
-export default function ProductTable() {
+export default function AdminProductApproval() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [newProduct, setNewProduct] = useState({ name: "", price: 0, category: "" });
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Load products from local storage on mount
+  // Load products from localStorage
   useEffect(() => {
-    const storedProducts = localStorage.getItem("products");
-    if (storedProducts) setProducts(JSON.parse(storedProducts));
+    const storedProducts = JSON.parse(localStorage.getItem("products") || "[]");
+    setProducts(storedProducts);
   }, []);
 
-  // Save products to local storage
-  const saveProducts = (updatedProducts: Product[]) => {
+  // Function to update product status in localStorage
+  const updateProductStatus = (productId: number, status: "approved" | "rejected") => {
+    const updatedProducts = products.map((product) =>
+      product.id === productId ? { ...product, status } : product
+    );
+
     setProducts(updatedProducts);
     localStorage.setItem("products", JSON.stringify(updatedProducts));
   };
 
-  // Add a new product
-  const handleAddProduct = () => {
-    if (!newProduct.name || newProduct.price <= 0 || !newProduct.category) return;
-    const newEntry = { id: Date.now(), ...newProduct };
-    saveProducts([...products, newEntry]);
-    setNewProduct({ name: "", price: 0, category: "" });
-  };
-
-  // Edit an existing product
-  const handleUpdateProduct = () => {
-    if (!editingProduct) return;
-    const updatedProducts = products.map((p) => (p.id === editingProduct.id ? editingProduct : p));
-    saveProducts(updatedProducts);
-    setEditingProduct(null);
-  };
-
-  // Delete a product
-  const handleDeleteProduct = (id: number) => {
-    const filteredProducts = products.filter((p) => p.id !== id);
-    saveProducts(filteredProducts);
-  };
-
   return (
-   
-    <div>
-      <div className="flex items-center gap-2 mb-4">
-        <Input
-          placeholder="Product Name"
-          value={newProduct.name}
-          onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-        />
-        <Input
-          type="number"
-          placeholder="Price"
-          value={newProduct.price}
-          onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
-        />
-        <Input
-          placeholder="Category"
-          value={newProduct.category}
-          onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-        />
-        <Button onClick={handleAddProduct}>Add Product</Button>
-      </div>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {products.map((product) => (
-            <TableRow key={product.id}>
-              <TableCell>{product.id}</TableCell>
-              <TableCell>{product.name}</TableCell>
-              <TableCell>${product.price}</TableCell>
-              <TableCell>{product.category}</TableCell>
-              <TableCell className="flex gap-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="icon" variant="outline" onClick={() => setEditingProduct(product)}>
-                      <Edit className="h-4 w-4" />
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Admin Product Approval</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {products.length > 0 ? (
+          products.map((product) => (
+            <Card key={product.id} className="shadow-md">
+              <CardHeader>
+                <CardTitle>{product.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <img src={product.image} alt={product.name} className="h-40 w-full object-cover rounded-md mb-2" />
+                <p className="text-gray-600 text-sm">₹{product.price}</p>
+                <Badge
+                  className={`mt-2 ${
+                    product.status === "approved"
+                      ? "bg-green-500"
+                      : product.status === "rejected"
+                      ? "bg-red-500"
+                      : "bg-yellow-500"
+                  }`}
+                >
+                  {product.status.toUpperCase()}
+                </Badge>
+                <div className="mt-4 flex space-x-2">
+                  {product.status !== "approved" && (
+                    <Button variant="default" onClick={() => updateProductStatus(product.id, "approved")}>
+                      Approve
+                    </Button> 
+                  )}
+                  {product.status !== "rejected" && (
+                    <Button variant="destructive" onClick={() => updateProductStatus(product.id, "rejected")}>
+                      Reject
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogTitle>Edit Product</DialogTitle>
-                    <Input
-                      placeholder="Name"
-                      value={editingProduct?.name || ""}
-                      onChange={(e) =>
-                        setEditingProduct((prev) => (prev ? { ...prev, name: e.target.value } : null))
-                      }
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Price"
-                      value={editingProduct?.price || 0}
-                      onChange={(e) =>
-                        setEditingProduct((prev) => (prev ? { ...prev, price: parseFloat(e.target.value) } : null))
-                      }
-                    />
-                    <Input
-                      placeholder="Category"
-                      value={editingProduct?.category || ""}
-                      onChange={(e) =>
-                        setEditingProduct((prev) => (prev ? { ...prev, category: e.target.value } : null))
-                      }
-                    />
-                    <Button onClick={handleUpdateProduct}>Save Changes</Button>
-                  </DialogContent>
-                </Dialog>
-                <Button size="icon" variant="destructive" onClick={() => handleDeleteProduct(product.id)}>
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <p className="text-gray-500">No products available.</p>
+        )}
+      </div>
     </div>
-   
   );
 }

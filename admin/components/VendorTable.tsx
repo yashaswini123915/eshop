@@ -17,55 +17,41 @@ interface Vendor {
 export default function VendorTable() {
   const router = useRouter();
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null); // Track button loading state
 
-  // Fetch vendors from the API
-  const fetchVendors = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/vendors");
+  // Fetch registered vendors from local storage
+  useEffect(() => {
+    const storedVendors = JSON.parse(localStorage.getItem("vendors") || "[]");
+    setVendors(storedVendors);
+    setLoading(false);
+  }, []);
 
-      if (!response.ok) throw new Error("Failed to fetch vendors");
-
-      const data = await response.json();
-      setVendors(Array.isArray(data.vendors) ? data.vendors : []);
-    } catch (error) {
-      console.error("Error fetching vendors:", error);
-      setError("Failed to load vendors");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Save vendors to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem("vendors", JSON.stringify(vendors));
+  }, [vendors]);
 
   // Handle vendor actions (approve/delete)
-  const handleVendorAction = async (id: number, action: "approve" | "delete") => {
+  const handleVendorAction = (id: number, action: "approve" | "delete") => {
     setActionLoading(id);
-    try {
-      const response = await fetch("/api/vendors", {
-        method: "POST",
-        body: JSON.stringify({ id, action }),
-        headers: { "Content-Type": "application/json" },
-      });
+    setTimeout(() => {
+      let updatedVendors = [...vendors];
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Action failed");
+      if (action === "approve") {
+        updatedVendors = updatedVendors.map((vendor) =>
+          vendor.id === id ? { ...vendor, status: "approved" } : vendor
+        );
+        toast.success("Vendor approved");
+      } else if (action === "delete") {
+        updatedVendors = updatedVendors.filter((vendor) => vendor.id !== id);
+        toast.success("Vendor deleted");
+      }
 
-      toast.success(data.message);
-      fetchVendors(); // Refresh vendor list
-    } catch (error) {
-      console.error(`Error ${action} vendor:`, error);
-      toast.error(`Failed to ${action} vendor`);
-    } finally {
+      setVendors(updatedVendors);
       setActionLoading(null);
-    }
+    }, 500);
   };
-
-  useEffect(() => {
-    fetchVendors();
-  }, []);
 
   return (
     <Card className="p-4">
@@ -75,8 +61,6 @@ export default function VendorTable() {
       <CardContent>
         {loading ? (
           <p className="text-center">Loading vendors...</p>
-        ) : error ? (
-          <p className="text-red-500 text-center">{error}</p>
         ) : vendors.length === 0 ? (
           <p className="text-center text-gray-500">No vendors available</p>
         ) : (
@@ -98,7 +82,9 @@ export default function VendorTable() {
                   <TableCell>{vendor.email}</TableCell>
                   <TableCell>{vendor.status}</TableCell>
                   <TableCell className="space-x-2">
-                    <Button size="sm" onClick={() => router.push(`/vendors/${vendor.id}`)}>View</Button>
+                    <Button size="sm" onClick={() => router.push(`/vendors/${vendor.id}`)}>
+                      View
+                    </Button>
                     {vendor.status !== "approved" && (
                       <Button
                         size="sm"
