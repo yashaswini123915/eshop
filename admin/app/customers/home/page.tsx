@@ -49,7 +49,7 @@ export default function HomePage() {
           className="w-1/3"
         />
         <div className="space-x-4">
-          <Button onClick={() => router.push("/vendors/register")} variant="outline">
+          <Button onClick={() => router.push("/vendors/login")} variant="outline">
             Become a Seller
           </Button>
           <Button onClick={() => router.push("/login")} variant="default">
