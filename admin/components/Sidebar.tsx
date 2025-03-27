@@ -15,6 +15,8 @@ const sidebarLinks = [
   { href: "./swtich", label: "Swtich Account", icon: <RefreshCw className="w-5 h-5" /> },
 ];
 
+export  const runtime = "edge";
+
 export default function Sidebar() {
   const pathname = usePathname();
 

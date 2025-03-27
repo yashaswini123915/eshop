@@ -11,7 +11,7 @@ interface Review {
   rating: number;
   comment: string;
 }
-
+export  const runtime = "edge";
 export default function ProductReviews({ productId }: { productId: string }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [rating, setRating] = useState(0);

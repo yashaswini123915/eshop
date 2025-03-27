@@ -1,6 +1,6 @@
 import CategoryTable from "@/components/CategoryTable";
 import AdminLayout from "@/components/AdminLayout";
-
+export  const runtime = "edge";
 export default function CategoriesPage() {
   return (
     <AdminLayout>

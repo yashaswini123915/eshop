@@ -11,7 +11,7 @@ type Category = {
   id: number;
   name: string;
 };
-
+export  const runtime = "edge";
 export default function CategoryTable() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState("");

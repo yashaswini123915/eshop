@@ -1,6 +1,6 @@
 import ProductTable from "@/components/ProductTable";
 import AdminLayout from "@/components/AdminLayout";
-
+export  const runtime = "edge";
 export default function ProductsPage() {
   return (
     <AdminLayout>

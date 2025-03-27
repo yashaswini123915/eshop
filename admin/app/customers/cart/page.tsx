@@ -12,7 +12,7 @@ interface CartItem {
   image: string;
   quantity: number;
 }
-
+export  const runtime = "edge";
 export default function CartPage() {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);

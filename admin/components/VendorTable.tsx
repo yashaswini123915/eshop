@@ -13,7 +13,7 @@ interface Vendor {
   email: string;
   status: string;
 }
-
+export  const runtime = "edge";
 export default function VendorTable() {
   const router = useRouter();
   const [vendors, setVendors] = useState<Vendor[]>([]);

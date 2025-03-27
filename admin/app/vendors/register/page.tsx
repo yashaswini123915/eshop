@@ -13,7 +13,7 @@ interface Vendor {
   email: string;
   status: string;
 }
-
+export  const runtime = "edge";
 export default function VendorRegistration() {
   const router = useRouter();
   const [username, setUsername] = useState("");

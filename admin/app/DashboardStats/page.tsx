@@ -1,7 +1,7 @@
 import DashboardStats from "@/components/DashboardStats";
 import AdminLayout from "@/components/AdminLayout";
 
-
+export  const runtime = "edge";
 export default function ProductsPage() {
   return (
     <AdminLayout>

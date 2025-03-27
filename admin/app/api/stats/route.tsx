@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-
+export  const runtime = "edge";
 export async function GET() {
   try {
     // Read from localStorage (Note: localStorage is not available in Next.js server)

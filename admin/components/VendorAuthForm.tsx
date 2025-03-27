@@ -10,7 +10,7 @@ import VendorLayout from "@/components/VendorLayout";
 interface VendorAuthFormProps {
   type: "login" | "register"; // Determines form type
 }
-
+export  const runtime = "edge";
 export default function VendorAuthForm({ type }: VendorAuthFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState({

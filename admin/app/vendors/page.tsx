@@ -2,7 +2,7 @@
 
 import VendorTable from "@/components/VendorTable";
 import AdminLayout from "@/components/AdminLayout"
-
+export  const runtime = "edge";
 export default function VendorsPage() {
   return (
     <AdminLayout>

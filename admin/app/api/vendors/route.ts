@@ -14,7 +14,7 @@ const saveVendors = (vendors: any) => {
     localStorage.setItem("vendors", JSON.stringify(vendors));
   }
 };
-
+export  const runtime = "edge";
 // GET: Fetch all vendors
 export async function GET() {
   try {

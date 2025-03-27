@@ -12,7 +12,7 @@ interface CartItem {
   price: number;
   quantity: number;
 }
-
+export  const runtime = "edge";
 export default function CheckoutPage() {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);

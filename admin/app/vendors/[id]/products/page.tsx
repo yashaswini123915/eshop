@@ -14,7 +14,7 @@ interface Product {
   description: string;
   status: "pending" | "approved" | "rejected";
 }
-
+export  const runtime = "edge";
 export default function VendorProductListings() {
   const { id } = useParams<{ id: string }>();
   const [products, setProducts] = useState<Product[]>([]);

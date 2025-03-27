@@ -13,7 +13,7 @@ interface Vendor {
   email: string;
   status: string;
 }
-
+export  const runtime = "edge";
 export default function VendorDashboard() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>(); // Extract vendor ID

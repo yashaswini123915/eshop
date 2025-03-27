@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import AdminLayout from "@/components/AdminLayout";
-
+export  const runtime = "edge";
 export default function SwitchPage() {
   const router = useRouter();
 

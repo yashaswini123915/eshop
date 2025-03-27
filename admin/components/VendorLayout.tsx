@@ -9,7 +9,7 @@ interface VendorLayoutProps {
   username: string;
   onSignOut: () => void;
 }
-
+export  const runtime = "edge";
 export default function VendorLayout({ children, username, onSignOut }: VendorLayoutProps) {
   return (
     <div className="flex h-screen">

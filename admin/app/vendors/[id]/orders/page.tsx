@@ -14,7 +14,7 @@ interface Order {
   status: "pending" | "shipped" | "delivered";
   vendorId: number;
 }
-
+export  const runtime = "edge";
 export default function VendorOrders() {
   const { id } = useParams<{ id: string }>(); // Vendor ID
   const [orders, setOrders] = useState<Order[]>([]);

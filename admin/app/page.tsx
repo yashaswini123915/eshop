@@ -48,7 +48,7 @@ const Dashboard = () => {
     setVendors((prevVendors) => prevVendors.filter((vendor) => vendor.id !== id));
     setTotalVendors((prev) => prev - 1); // Update total count on delete
   };
-
+ 
   return (
     <AdminLayout>
     <div className="flex min-h-screen bg-gray-100">
@@ -99,3 +99,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+export  const runtime = "edge";

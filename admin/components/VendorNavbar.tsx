@@ -8,7 +8,7 @@ interface VendorNavbarProps {
   username: string;
   onSignOut: () => void;
 }
-
+export  const runtime = "edge";
 export default function VendorNavbar({ username }: VendorNavbarProps) {
 
   return (

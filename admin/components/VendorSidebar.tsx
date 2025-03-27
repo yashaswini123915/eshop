@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Home, Package, ShoppingCart, LogOut } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
-
+export  const runtime = "edge";
 export default function VendorSidebar() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>(); // Get vendor ID

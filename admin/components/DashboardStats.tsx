@@ -79,6 +79,7 @@ const DashboardStats = () => {
     { name: "Allowed", value: stats.allowedVendors, color: "#4CAF50" },
     { name: "Disallowed", value: stats.disallowedVendors, color: "#F44336" },
   ];
+ 
 
   return (
     
@@ -141,3 +142,4 @@ const DashboardStats = () => {
 };
 
 export default DashboardStats;
+export  const runtime = "edge";

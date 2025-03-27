@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
+export  const runtime = "edge";
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");

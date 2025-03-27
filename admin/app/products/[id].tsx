@@ -1,5 +1,5 @@
 import ProductReviews from "@/components/ProductReviews/page";
-
+export  const runtime = "edge";
 export default function ProductPage({ params }: { params: { id: string } }) {
   const productId = params.id;
 

@@ -13,7 +13,7 @@ interface Product {
   image: string;
   status: "pending" | "approved" | "rejected";
 }
-
+export  const runtime = "edge";
 export default function HomePage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);

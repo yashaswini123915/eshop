@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner"; // Import toast notifications
-
+export  const runtime = "edge";
 export default function CustomerLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

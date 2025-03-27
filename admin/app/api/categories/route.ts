@@ -22,7 +22,7 @@ interface Category {
 const saveCategories = (categories: Category[]) => {
   fs.writeFileSync(categoriesFilePath, JSON.stringify(categories, null, 2));
 };
-
+export  const runtime = "edge";
 // **GET - Fetch all categories**
 export async function GET() {
   try {

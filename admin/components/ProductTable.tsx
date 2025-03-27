@@ -14,6 +14,7 @@ interface Product {
   description: string;
   status: "pending" | "approved" | "rejected";
 }
+export  const runtime = "edge";
 
 export default function AdminProductApproval() {
   const [products, setProducts] = useState<Product[]>([]);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
+export  const runtime = "edge";
 // Fetch all orders (GET)
 export async function GET() {
   const orders = JSON.parse(localStorage.getItem("orders") || "[]");
